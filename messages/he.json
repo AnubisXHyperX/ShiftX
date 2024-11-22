@@ -1,0 +1,118 @@
+{
+  "Index": {
+    "greet": "שלום, {name}!",
+    "guest": "אורח",
+    "pricesTitle": "מחירים מועצת הצמחים",
+    "product": "מוצר",
+    "typeA": "סוג א׳",
+    "best": "מובחר",
+    "profile": "פרופיל",
+    "team": "צוות",
+    "products": "מוצרים",
+    "employees": "עובדים",
+    "settings": "הגדרות",
+    "trash": "פח אשפה",
+    "logout": "יציאה",
+    "login": "כניסה",
+    "contactUs": "צור קשר",
+    "privacyPolicy": "פרטיות",
+    "termOfUse": "תקנון",
+    "language": "שפה",
+    "notFound": "דף לא נמצא, חזור הביתה!",
+    "error": "התרחשה שגיאה!",
+    "light": "יום",
+    "dark": "לילה",
+    "system": "מערכת"
+  },
+  "Products": {
+    "title": "מוצרים",
+    "caption": "כאן מוסיפים ועורכים מוצרים",
+    "newItem": "פריט חדש",
+    "editItem": "ערוך פריט",
+    "name": "שם",
+    "description": "תיאור",
+    "close": "סגור"
+  },
+  "Employees": {
+    "title": "לקוחות",
+    "caption": "כאן מוסיפים ועורכים לקוחות",
+    "name": "שם",
+    "email": "אימייל",
+    "phoneNumber": "טלפון",
+    "close": "סגור",
+    "newItem": "פריט חדש",
+    "editItem": "ערוך פריט"
+  },
+  "Login": {
+    "title": "התחברות",
+    "caption": "הכנס את הפרטים האישיים שלך כדי להתחבר",
+    "email": "אימייל",
+    "password": "סיסמא",
+    "signIn": "התחבר",
+    "noAccount": "אין משתמש?",
+    "signUp": "הרשם",
+    "noAccountError": "האימייל שהזנת לא מחובר לחשבון",
+    "shortPasswordError": "הסיסמא צריכה להיות יותר ארוכה",
+    "emailError": "אימייל לא תקין",
+    "wrongPasswordError": "הסיסמה שהזנת שגויה"
+  },
+  "SignUp": {
+    "title": "הרשמה",
+    "caption": "הכנס את הפרטים האישיים שלך כדי להרשם",
+    "name": "שם",
+    "hebrewName": "שם בעברית",
+    "email": "אימייל",
+    "password": "סיסמא",
+    "signUp": "הרשם",
+    "hasAccount": "כבר יש משתמש?",
+    "signIn": "התחבר"
+  },
+  "Settings": {
+    "title": "הגדרות"
+  },
+  "Pallets": {
+    "clientSelect": "בחר לקוח",
+    "productSelect": "בחר מוצר",
+    "newItem": "פריט חדש",
+    "editItem": "ערוך פריט",
+    "cartons": "קרטונים",
+    "weight": "משקל",
+    "close": "סגור",
+    "alertTitle": "האם אתה בטוח?",
+    "shipAlertDescription": "הפעולה תיצור תעודת משלוח חדשה עבור הלקוח",
+    "alertAccept": "כן",
+    "alertCancel": "לא",
+    "product": "מוצר",
+    "name": "שם",
+    "title": "הזמנה {name}",
+    "deletedOrder": "הזמנה מחוקה"
+  },
+  "ShippingSlips": {
+    "title": "תעודות משלוח",
+    "caption": "כאן ניתן לראות תעודות משלוח היסטוריות עבור לקוח"
+  },
+  "Stats": {
+    "title": "סטטיסטיקות",
+    "caption": "כאן ניתן לחפש מידע על תעודות משלוח לפי טווחי זמן",
+    "pickDate": "בחר תאריך",
+    "product": "מוצר",
+    "kg": "ק״ג",
+    "total": "סה״כ",
+    "select": "בחר לקוחות"
+  },
+  "Team": {
+    "title": "צוות"
+  },
+  "AdminPage": {
+    "lang": "he",
+    "title": "דף מנהל",
+    "content": "כאן ניתן לשבץ עובדים לטיסות ומשמרות.",
+    "Sunday": "יום ראשון",
+    "Monday": "יום שני",
+    "Tuesday": "יום שלישי",
+    "Wednesday": "יום רביעי",
+    "Thursday": "יום חמישי",
+    "Friday": "יום שישי",
+    "Saturday": "שבת"
+  }
+}

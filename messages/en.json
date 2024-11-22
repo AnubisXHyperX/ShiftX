@@ -1,0 +1,118 @@
+{
+  "Index": {
+    "greet": "Hi, {name}!",
+    "guest": "Guest",
+    "pricesTitle": "Plants board prices",
+    "product": "Product",
+    "typeA": "Type A",
+    "best": "Best",
+    "profile": "Profile",
+    "team": "Team",
+    "products": "Products",
+    "employees": "Employees",
+    "settings": "Settings",
+    "trash": "Trash",
+    "logout": "Logout",
+    "login": "Login",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "termOfUse": "Terms of Use",
+    "language": "Language",
+    "notFound": "Not found, go back home!",
+    "error": "Something went wrong!",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "Products": {
+    "title": "Products",
+    "caption": "Here you can edit and add products",
+    "newItem": "New Item",
+    "editItem": "Edit Item",
+    "name": "Name",
+    "description": "Description",
+    "close": "Close"
+  },
+  "Employees": {
+    "title": "Clients",
+    "caption": "Here you can edit and add clients",
+    "name": "Name",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "close": "Close",
+    "newItem": "New Item",
+    "editItem": "Edit Item"
+  },
+  "Login": {
+    "title": "Login",
+    "caption": "Enter your email below to login to your account",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "noAccountError": "The email you entered isn’t connected to an account",
+    "shortPasswordError": "Password is too short",
+    "emailError": "Invalid email",
+    "wrongPasswordError": "The password you’ve entered is incorrect"
+  },
+  "SignUp": {
+    "title": "Create an account",
+    "caption": "Fill up the fields below to create your account",
+    "name": "Name",
+    "hebrewName": "Hebrew Name",
+    "email": "Email",
+    "password": "Password",
+    "signUp": "Sign Up",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign In"
+  },
+  "Settings": {
+    "title": "Settings"
+  },
+  "Pallets": {
+    "clientSelect": "Select a client",
+    "productSelect": "Select a product",
+    "newItem": "New Item",
+    "editItem": "Edit Item",
+    "cartons": "Cartons",
+    "weight": "Weight",
+    "close": "Close",
+    "alertTitle": "Are you sure?",
+    "shipAlertDescription": "This action will create a new shipping slip for the client",
+    "alertAccept": "Yes",
+    "alertCancel": "No",
+    "product": "Product",
+    "name": "Name",
+    "title": "Order {name}",
+    "deletedOrder": "Deleted Order"
+  },
+  "ShippingSlips": {
+    "title": "Shipping Slips",
+    "caption": "Here you can view past shipping slips for a specific client"
+  },
+  "Stats": {
+    "title": "Stats",
+    "caption": "Search shipping data for specific time range",
+    "pickDate": "Pick a date",
+    "product": "Product",
+    "kg": "KG",
+    "total": "Total",
+    "select": "Select Clients"
+  },
+  "Team": {
+    "title": "Team"
+  },
+  "AdminPage": {
+    "lang": "en",
+    "title": "Admin Page",
+    "content": "Drag and drop users to assign them to flights.",
+    "Sunday": "Sunday",
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Saturday": "Saturday"
+  }
+}

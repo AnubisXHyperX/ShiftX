@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id
+  sessions          Session[]
+  email             String             @unique
+  name              String
+  hebrewName        String
+  passwordHash      String
+  role              Role               @default(EMPLOYEE)
+  jobType           JobType            @default(RAMPAGENT)
+  // division     Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  // divisionId   String
+  FlightAssignments FlightAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+// model Division {
+//   id    String @id @default(cuid())
+//   name  String @unique
+//   users User[]
+// }
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+}
+
+enum JobType {
+  RAMPAGENT
+  PLANNER
+  LOADMASTER
+}
+
+model FlightAssignment {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  flight    String   @db.VarChar(255)
+  day       String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, flight, day], name: "user_flight_day_unique")
+}
