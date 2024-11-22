@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id
+  sessions          Session[]
+  email             String             @unique
+  name              String
+  hebrewName        String
+  passwordHash      String
+  role              Role               @default(EMPLOYEE)
+  jobType           JobType            @default(TRAINEE)
+  blocks            Block[]
+  FlightAssignments FlightAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+}
+
+enum JobType {
+  TRAINEE
+  RAMPAGENT
+  PLANNER
+  LOADMASTER
+}
+
+model FlightAssignment {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  flight    String   @db.VarChar(255)
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, flight, date], name: "user_flight_day_unique")
+}
+
+model Block {
+  id     String   @id @default(cuid())
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  date   DateTime
+  hours  Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date], name: "user_date_unique")
+}
