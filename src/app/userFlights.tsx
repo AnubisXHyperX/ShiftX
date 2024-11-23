@@ -3,7 +3,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import challengeLogo from '../../public/challenge.png'
 import swissLogo from '../../public/swiss.png'
 
 interface Flight {
@@ -86,13 +85,13 @@ export default function UserFlights() {
             </div>
 
             {/* Grid for departures and arrivals with a divider */}
-            <div className="grid grid-cols-[1fr_0.05fr_1fr] gap-6 h-auto" dir='rtl'>
+            <div className="grid grid-cols-1 gap-6 h-auto" dir='rtl'>
                 {/* Departures Column */}
                 <div className="flex flex-col gap-4">
                     {departures.map((flight) => (
                         <div
                             key={flight.number}
-                            className="flex-grow flex flex-row justify-center gap-6 items-center border border-green-600 bg-secondary text-foreground p-4 rounded-lg"
+                            className="flex-grow flex flex-row justify-center gap-20 items-center border border-green-600 bg-secondary text-foreground p-4 rounded-lg"
                             dir='ltr'
                         >
                             <Image src={swissLogo} width={65} alt='swiss' />
@@ -106,9 +105,8 @@ export default function UserFlights() {
                 </div>
 
                 {/* Divider */}
-                <div className="bg-secondary-foreground w-0.5 h-auto rounded-sm" />
+                {/* <div className="bg-secondary-foreground w-0.5 h-auto rounded-sm" />
 
-                {/* Arrivals Column */}
                 <div className="flex flex-col gap-4">
                     {arrivals.map((flight) => (
                         <div
@@ -124,7 +122,7 @@ export default function UserFlights() {
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> */}
             </div>
         </div>
     )
