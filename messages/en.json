@@ -22,7 +22,8 @@
     "error": "Something went wrong!",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "lang": "en"
   },
   "Products": {
     "title": "Products",
@@ -113,6 +114,7 @@
     "Wednesday": "Wednesday",
     "Thursday": "Thursday",
     "Friday": "Friday",
-    "Saturday": "Saturday"
+    "Saturday": "Saturday",
+    "Week of": "Week of"
   }
 }

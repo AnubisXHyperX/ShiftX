@@ -14,8 +14,8 @@ import { UserProvider } from './user-provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Farmer',
-  description: 'Created by farmers for farmers',
+  title: 'ShiftX',
+  description: 'Shift Manager',
 }
 
 export default async function RootLayout({

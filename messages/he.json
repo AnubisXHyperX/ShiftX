@@ -22,7 +22,8 @@
     "error": "התרחשה שגיאה!",
     "light": "יום",
     "dark": "לילה",
-    "system": "מערכת"
+    "system": "מערכת",
+    "lang": "he"
   },
   "Products": {
     "title": "מוצרים",
@@ -113,6 +114,7 @@
     "Wednesday": "יום רביעי",
     "Thursday": "יום חמישי",
     "Friday": "יום שישי",
-    "Saturday": "שבת"
+    "Saturday": "שבת",
+    "Week of": "שבוע של"
   }
 }

@@ -2,6 +2,7 @@
 
 import PageLoader from '@/components/page-loader'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -11,21 +12,26 @@ import {
 } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { JobType } from '@prisma/client'
-import { ArrowUpFromLineIcon, NotebookPenIcon, PlaneIcon, XIcon } from 'lucide-react'
+import { addDays, format, startOfWeek } from 'date-fns'
+import { ArrowUpFromLineIcon, ChevronLeftIcon, ChevronRightIcon, NotebookPenIcon, PlaneIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
-import { DndProvider, useDrag, useDrop } from 'react-dnd'
+import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import useSWR from 'swr'
 import ErrorComp from '../error'
+import { useUser } from '../user-provider'
+import { DraggableUser } from './DraggableUser'
+import { DroppableCell } from './DroppableCell'
 
-interface Schedule {
+
+export interface Schedule {
   [day: string]: {
     [flight: string]: string[]
   }
 }
 
-interface User {
+export interface User {
   id: string
   name: string
   hebrewName: string
@@ -71,29 +77,38 @@ function groupUsersByJobType(users: User[]): { [jobType: string]: User[] } {
 }
 
 // Map job types to colors
-const jobTypeColors: { [key in User['jobType']]: string } = {
+export const jobTypeColors: { [key in User['jobType']]: string } = {
   RAMPAGENT: 'bg-green-700 hover:bg-green-600',
   PLANNER: 'bg-blue-700 hover:bg-blue-600',
   LOADMASTER: 'bg-red-700 hover:bg-red-600',
 }
 
 export default function AdminPage() {
+  const user = useUser()
+  const [currentWeek, setCurrentWeek] = useState(new Date())
   const { data: users, error } = useSWR<User[]>('/api/users', fetcher)
 
   const [schedule, setSchedule] = useState<Schedule>({})
 
   const t = useTranslations('AdminPage')
 
+  const startOfCurrentWeek = startOfWeek(currentWeek, { weekStartsOn: 0 }) // Week starts on Sunday
+  const days = Array.from({ length: 7 }).map((_, index) => {
+    const date = addDays(startOfCurrentWeek, index);
+    return {
+      key: format(date, 'EEEE'), // Day name (e.g., Sunday)
+      display: format(date, 'dd/MM'), // Formatted date for display (e.g., 19/11)
+      fullDate: format(date, 'yyyy-MM-dd'), // Full ISO date for backend (e.g., 2024-11-24)
+    };
+  });
 
-  const days = [
-    { key: 'Sunday', display: t('Sunday'), date: '19/11' },
-    { key: 'Monday', display: t('Monday'), date: '20/11' },
-    { key: 'Tuesday', display: t('Tuesday'), date: '21/11' },
-    { key: 'Wednesday', display: t('Wednesday'), date: '22/11' },
-    { key: 'Thursday', display: t('Thursday'), date: '23/11' },
-    { key: 'Friday', display: t('Friday'), date: '24/11' },
-    { key: 'Saturday', display: t('Saturday'), date: '25/11' },
-  ]
+  const handlePrevWeek = () => {
+    setCurrentWeek((prev) => addDays(prev, -7))
+  }
+
+  const handleNextWeek = () => {
+    setCurrentWeek((prev) => addDays(prev, 7))
+  }
 
   useEffect(() => {
     // Fetch existing assignments on component mount
@@ -111,46 +126,81 @@ export default function AdminPage() {
     fetchAssignments()
   }, [])
 
-  const assignUserToFlight = async (day: string, flight: string, userId: string) => {
+  const assignUserToFlight = async (date: string, flight: string, userId: string) => {
+    if (!date || !flight || !userId) {
+      console.error('Invalid assign parameters:', { date, flight, userId });
+      return;
+    }
+
     setSchedule((prev) => {
-      const existingUsers = prev[day]?.[flight] || []
-      if (existingUsers.includes(userId)) return prev
+      const existingUsers = prev[date]?.[flight] || [];
+      if (existingUsers.includes(userId)) return prev;
       return {
         ...prev,
-        [day]: {
-          ...(prev[day] || {}),
+        [date]: {
+          ...(prev[date] || {}),
           [flight]: [...existingUsers, userId],
         },
-      }
-    })
+      };
+    });
 
     try {
-      await fetch('/api/assignments', {
+      const response = await fetch('/api/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, flight, day }),
-      })
-    } catch (error) {
-      console.error('Failed to save assignment:', error)
-    }
-  }
+        body: JSON.stringify({
+          userId,
+          flight,
+          date,
+        }),
+      });
 
-  const removeUserFromFlight = async (day: string, flight: string, userId: string) => {
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Backend error:', error);
+      }
+    } catch (error) {
+      console.error('Failed to save assignment:', error);
+    }
+  };
+
+  const removeUserFromFlight = async (dayOrDate: string, flight: string, userId: string) => {
+    const dayInfo = days.find((d) => d.key === dayOrDate || d.fullDate === dayOrDate);
+    const fullDate = dayInfo?.fullDate || dayOrDate; // Fallback to dayOrDate if already full date
+
+    if (!fullDate) {
+      console.error('Date not found for the given day:', dayOrDate);
+      return;
+    }
+
+    // Optimistically update the UI
     setSchedule((prev) => ({
       ...prev,
-      [day]: {
-        ...(prev[day] || {}),
-        [flight]: (prev[day]?.[flight] || []).filter((id) => id !== userId),
+      [fullDate]: {
+        ...(prev[fullDate] || {}),
+        [flight]: (prev[fullDate]?.[flight] || []).filter((id) => id !== userId),
       },
     }));
 
     try {
-      const queryParams = new URLSearchParams({ userId, flight, day }).toString();
-      await fetch(`/api/assignments?${queryParams}`, {
+      const queryParams = new URLSearchParams({
+        userId,
+        flight,
+        date: fullDate,
+      }).toString();
+
+      const response = await fetch(`/api/assignments?${queryParams}`, {
         method: 'DELETE',
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Failed to remove assignment from backend:', error);
+      } else {
+        console.log('User removed successfully');
+      }
     } catch (error) {
-      console.error('Failed to remove assignment:', error);
+      console.error('Error removing user from flight:', error);
     }
   };
 
@@ -179,6 +229,7 @@ export default function AdminPage() {
         return 'dark:bg-gray-800 bg-gray-500'
     }
   }
+
 
   if (error) return <ErrorComp error={error} reset={function (): void {
     throw new Error('Function not implemented.')
@@ -214,6 +265,17 @@ export default function AdminPage() {
               </div>
             ))}
           </Card>
+          <div className="flex items-center justify-between py-4" dir='ltr'>
+            <Button onClick={handlePrevWeek} className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700" size={'icon'}>
+              <ChevronLeftIcon />
+            </Button>
+            <div className="text-xl font-bold">
+              {t('Week of')} {format(startOfCurrentWeek, 'dd/MM/yyyy')}
+            </div>
+            <Button onClick={handleNextWeek} className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700" size={'icon'}>
+              <ChevronRightIcon />
+            </Button>
+          </div>
           <Table className="rounded-lg text-background">
             <TableHeader>
               <TableRow>
@@ -223,9 +285,9 @@ export default function AdminPage() {
                     key={day.key}
                     className={`border text-center bg-secondary ${t('lang') === 'he' ? 'text-right' : 'text-center'}`}
                   >
-                    <div className="text-center">
-                      <p className="font-semibold">{day.display}</p>
-                      <p className="text-sm">{day.date}</p>
+                    <div className="text-center flex flex-col">
+                      <span className="font-semibold">{day.display}</span>
+                      <span className="text-sm">{day.key}</span>
                     </div>
                   </TableHead>
                 ))}
@@ -240,10 +302,11 @@ export default function AdminPage() {
                       key={`${day.key}-${flight}`}
                       day={day.key}
                       flight={flight}
-                      assignedUsers={schedule[day.key]?.[flight] || []}
+                      assignedUsers={schedule[day.fullDate]?.[flight] || []} // Use full date
                       assignUser={assignUserToFlight}
                       removeUser={removeUserFromFlight}
                       users={users}
+                      days={days}
                     />
                   ))}
                 </TableRow>
@@ -253,142 +316,5 @@ export default function AdminPage() {
         </CardContent>
       </Card>
     </DndProvider>
-  )
-}
-
-function DraggableUser({ user }: { user: User }) {
-  const t = useTranslations('AdminPage')
-  const isHebrew = t('lang') === 'he'
-
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'USER',
-    item: { id: user.id },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }))
-
-  const color = jobTypeColors[user.jobType]
-
-  return (
-    <div ref={drag as unknown as React.RefObject<HTMLDivElement>} className="cursor-pointer">
-      <Badge className={`${isDragging ? 'opacity-50' : 'opacity-100'} ${color} text-background`}>
-        {isHebrew && user.hebrewName ? user.hebrewName : user.name}
-      </Badge>
-    </div>
-  )
-}
-
-function DroppableBadge({
-  day,
-  flight,
-  currentUserId,
-  assignUser,
-  removeUser,
-  user,
-}: {
-  day: string
-  flight: string
-  currentUserId: string
-  assignUser: (day: string, flight: string, userId: string) => void
-  removeUser: (day: string, flight: string, userId: string) => void
-  user: User
-}) {
-  const t = useTranslations('AdminPage')
-  const isHebrew = t('lang') === 'he'
-
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'USER',
-    drop: async (item: { id: string }) => {
-      try {
-        await fetch('/api/assignments', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            currentUserId,
-            newUserId: item.id,
-            day,
-            flight,
-          }),
-        })
-
-        await removeUser(day, flight, currentUserId)
-        await assignUser(day, flight, item.id)
-      } catch (error) {
-        console.error('Failed to replace assignment:', error)
-      }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }))
-
-  const color = jobTypeColors[user.jobType]
-
-  return (
-    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className="relative flex items-center">
-      <Badge className={`flex items-center gap-2 ${color} ${isOver ? 'ring-2 ring-blue-500' : ''} text-background`}>
-        {isHebrew && user.hebrewName ? user.hebrewName : user.name}
-        <XIcon
-          className="w-4 h-4 cursor-pointer"
-          onClick={async () => await removeUser(day, flight, currentUserId)}
-        />
-      </Badge>
-    </div>
-  )
-}
-
-function DroppableCell({
-  day,
-  flight,
-  assignedUsers,
-  assignUser,
-  removeUser,
-  users,
-}: {
-  day: string
-  flight: string
-  assignedUsers: string[]
-  assignUser: (day: string, flight: string, userId: string) => void
-  removeUser: (day: string, flight: string, userId: string) => void
-  users: User[]
-}) {
-  const t = useTranslations('AdminPage')
-  const isHebrew = t('lang') === 'he'
-
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'USER',
-    drop: (item: { id: string }) => {
-      assignUser(day, flight, item.id)
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }))
-
-  return (
-    <TableCell
-      ref={drop as unknown as React.RefObject<HTMLTableCellElement>}
-      className={`border text-center p-2 ${isOver ? 'bg-gray-100 dark:bg-background' : 'bg-white dark:bg-background'}`}
-    >
-      <div className="flex justify-center items-center flex-wrap gap-2 h-full">
-        {assignedUsers.map((userId, index) => {
-          const user = users.find((u) => u.id === userId)
-          if (!user) return null
-
-          return (
-            <DroppableBadge
-              key={userId + index}
-              day={day}
-              flight={flight}
-              currentUserId={userId}
-              assignUser={assignUser}
-              removeUser={removeUser}
-              user={user} // Pass full user object
-            />
-          )
-        })}
-      </div>
-    </TableCell>
   )
 }

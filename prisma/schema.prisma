@@ -53,9 +53,9 @@ model FlightAssignment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   flight    String   @db.VarChar(255)
-  day       String   @db.VarChar(255)
+  date      DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, flight, day], name: "user_flight_day_unique")
+  @@unique([userId, flight, date], name: "user_flight_day_unique")
 }

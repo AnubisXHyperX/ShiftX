@@ -19,12 +19,13 @@ export async function GET(request: Request) {
             select: {
                 userId: true,
                 flight: true,
-                day: true,
+                date: true,
             },
         })
 
         const structuredAssignments = assignments.reduce((acc, assignment) => {
-            const { day, flight, userId } = assignment
+            const { date, flight, userId } = assignment
+            const day = new Date(date).toISOString().split('T')[0] // Format date to YYYY-MM-DD
             if (!acc[day]) acc[day] = {}
             if (!acc[day][flight]) acc[day][flight] = []
             acc[day][flight].push(userId)
@@ -49,25 +50,24 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json()
-        const { userId, day, flight } = body
+        const { userId, date, flight } = body
 
-        if (!userId || !day || !flight) {
+        if (!userId || !date || !flight) {
             return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 })
         }
 
         const assignment = await prisma.flightAssignment.upsert({
             where: {
-                user_flight_day_unique: { userId, day, flight },
+                user_flight_day_unique: { userId, flight, date: new Date(date) },
             },
             create: {
                 userId,
-                day,
                 flight,
-                
+                date: new Date(date),
             },
             update: {
-                day,
                 flight,
+                date: new Date(date),
             },
         })
 
@@ -82,27 +82,32 @@ export async function DELETE(request: Request) {
         const { user } = await validateRequest();
 
         if (!user) {
+            console.error('Unauthorized request');
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
 
         const url = new URL(request.url);
         const userId = url.searchParams.get('userId');
-        const day = url.searchParams.get('day');
+        const date = url.searchParams.get('date');
         const flight = url.searchParams.get('flight');
 
-        if (!userId || !day || !flight) {
+        if (!userId || !date || !flight) {
+            console.error('Missing or invalid query parameters:', { userId, date, flight });
             return new Response(JSON.stringify({ error: 'Missing required query parameters' }), { status: 400 });
         }
 
-        // Delete the flight assignment
-        await prisma.flightAssignment.delete({
+        console.log('Deleting assignment:', { userId, date, flight });
+
+        const result = await prisma.flightAssignment.delete({
             where: {
-                user_flight_day_unique: { userId, day, flight }, // Use the unique constraint name
+                user_flight_day_unique: { userId, flight, date: new Date(date) },
             },
         });
 
+        console.log('Assignment deleted successfully:', result);
         return new Response(null, { status: 204 });
     } catch (error) {
+        console.error('Error in DELETE handler:', error);
         return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 });
     }
 }
@@ -116,16 +121,16 @@ export async function PUT(request: Request) {
         }
 
         const body = await request.json()
-        const { currentUserId, newUserId, day, flight } = body
+        const { currentUserId, newUserId, date, flight } = body
 
-        if (!currentUserId || !newUserId || !day || !flight) {
+        if (!currentUserId || !newUserId || !date || !flight) {
             return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 })
         }
 
         // Remove current user
         await prisma.flightAssignment.delete({
             where: {
-                user_flight_day_unique: { userId: currentUserId, day, flight },
+                user_flight_day_unique: { userId: currentUserId, flight, date: new Date(date) },
             },
         })
 
@@ -133,8 +138,8 @@ export async function PUT(request: Request) {
         const newAssignment = await prisma.flightAssignment.create({
             data: {
                 userId: newUserId,
-                day,
                 flight,
+                date: new Date(date),
             },
         })
 
