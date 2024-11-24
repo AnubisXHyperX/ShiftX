@@ -77,11 +77,7 @@ function groupUsersByJobType(users: User[]): { [jobType: string]: User[] } {
 }
 
 // Map job types to colors
-export const jobTypeColors: { [key in User['jobType']]: string } = {
-  RAMPAGENT: 'bg-green-700 hover:bg-green-600',
-  PLANNER: 'bg-blue-700 hover:bg-blue-600',
-  LOADMASTER: 'bg-red-700 hover:bg-red-600',
-}
+
 
 export default function AdminPage() {
   const user = useUser()
@@ -92,9 +88,9 @@ export default function AdminPage() {
 
   const t = useTranslations('AdminPage')
 
-  const startOfCurrentWeek = startOfWeek(currentWeek, { weekStartsOn: 0 }) // Week starts on Sunday
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 }); // Week starts on Sunday
   const days = Array.from({ length: 7 }).map((_, index) => {
-    const date = addDays(startOfCurrentWeek, index);
+    const date = addDays(weekStart, index);
     return {
       key: format(date, 'EEEE'), // Day name (e.g., Sunday)
       display: format(date, 'dd/MM'), // Formatted date for display (e.g., 19/11)
@@ -151,7 +147,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           userId,
           flight,
-          date,
+          date, // This ensures the correct date is used
         }),
       });
 
@@ -165,8 +161,16 @@ export default function AdminPage() {
   };
 
   const removeUserFromFlight = async (dayOrDate: string, flight: string, userId: string) => {
-    const dayInfo = days.find((d) => d.key === dayOrDate || d.fullDate === dayOrDate);
-    const fullDate = dayInfo?.fullDate || dayOrDate; // Fallback to dayOrDate if already full date
+    const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 });
+    const activeDays = Array.from({ length: 7 }).map((_, index) => {
+      const date = addDays(weekStart, index);
+      return {
+        key: format(date, 'EEEE'),
+        fullDate: format(date, 'yyyy-MM-dd'),
+      };
+    });
+    const dayInfo = activeDays.find((d) => d.key === dayOrDate || d.fullDate === dayOrDate);
+    const fullDate = dayInfo?.fullDate || dayOrDate;
 
     if (!fullDate) {
       console.error('Date not found for the given day:', dayOrDate);
@@ -243,9 +247,9 @@ export default function AdminPage() {
       <Card className="mx-auto max-w-6xl rounded-none xs:rounded-lg">
         <CardHeader>
           <CardTitle className="text-xl">{t('title')}</CardTitle>
-          <CardDescription className='flex justify-between'>
+          <CardDescription className='flex justify-between flex-col gap-4'>
             {t('content')}
-            <div className='flex gap-2' dir='rtl'>
+            <div className='flex justify-center gap-2' dir='rtl'>
               <Badge className='text-background bg-green-700 hover:bg-green-600'><PlaneIcon size={12} />&nbsp;Ramp Agent</Badge>
               <Badge className='text-background bg-blue-700 hover:bg-blue-600'><NotebookPenIcon size={12} />&nbsp;Planner</Badge>
               <Badge className='text-background bg-red-700 hover:bg-red-600'><ArrowUpFromLineIcon size={12} />&nbsp;Loadmaster</Badge>
@@ -255,7 +259,7 @@ export default function AdminPage() {
         <CardContent className="flex flex-col gap-6">
           <Card className="p-4 flex flex-wrap gap-2">
             {Object.entries(groupedUsers).map(([jobType, users]) => (
-              <div key={jobType} className="mb-4">
+              <div key={jobType}>
                 {/* <h3 className="text-lg font-bold">{jobType}</h3> */}
                 <div className="flex flex-wrap gap-2">
                   {users.map((user) => (
@@ -270,7 +274,7 @@ export default function AdminPage() {
               <ChevronLeftIcon />
             </Button>
             <div className="text-xl font-bold">
-              {t('Week of')} {format(startOfCurrentWeek, 'dd/MM/yyyy')}
+              {t('Week of')} {format(weekStart, 'dd/MM/yyyy')}
             </div>
             <Button onClick={handleNextWeek} className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700" size={'icon'}>
               <ChevronRightIcon />
@@ -296,17 +300,16 @@ export default function AdminPage() {
             <TableBody>
               {flights.map((flight) => (
                 <TableRow key={flight} className="border text-center">
-                  <TableCell className={`border font-medium ${getCompanyColor(flight)}`}>{flight}</TableCell>
+                  <TableCell className={`border font-medium ${getCompanyColor(flight)} whitespace-nowrap`}>{flight}</TableCell>
                   {days.map((day) => (
                     <DroppableCell
-                      key={`${day.key}-${flight}`}
-                      day={day.key}
+                      key={`${day.fullDate}-${flight}`} // Use fullDate in the key
+                      fullDate={day.fullDate} // Pass fullDate explicitly
                       flight={flight}
-                      assignedUsers={schedule[day.fullDate]?.[flight] || []} // Use full date
+                      assignedUsers={schedule[day.fullDate]?.[flight] || []} // Use fullDate
                       assignUser={assignUserToFlight}
                       removeUser={removeUserFromFlight}
                       users={users}
-                      days={days}
                     />
                   ))}
                 </TableRow>

@@ -1,6 +1,12 @@
 import { useTranslations } from "next-intl";
 import { useDrag } from "react-dnd";
-import { jobTypeColors, User } from "./page";
+import { User } from "./page";
+
+export const jobTypeColors: { [key in User['jobType']]: string } = {
+    RAMPAGENT: 'bg-green-700 hover:bg-green-600',
+    PLANNER: 'bg-blue-700 hover:bg-blue-600',
+    LOADMASTER: 'bg-red-700 hover:bg-red-600',
+}
 
 export function DraggableUser({ user }: { user: User }) {
     const t = useTranslations("AdminPage");

@@ -4,30 +4,24 @@ import { DroppableBadge } from "./DroppableBadge";
 import { User } from "./page";
 
 export function DroppableCell({
-    day,
+    fullDate, // Receive fullDate directly
     flight,
     assignedUsers,
     assignUser,
     removeUser,
     users,
-    days,
 }: {
-    day: string;
+    fullDate: string; // Use fullDate explicitly
     flight: string;
     assignedUsers: string[];
     assignUser: (date: string, flight: string, userId: string) => void;
     removeUser: (date: string, flight: string, userId: string) => void;
     users: User[];
-    days: { key: string; display: string; fullDate: string }[];
 }) {
-    const dayInfo = days.find((d) => d.key === day || d.fullDate === day);
-    const fullDate = dayInfo?.fullDate || '';
-    const displayDate = dayInfo?.display || '';
-
     const [{ isOver }, drop] = useDrop(() => ({
-        accept: 'USER',
+        accept: "USER",
         drop: (item: { id: string }) => {
-            assignUser(fullDate, flight, item.id);
+            assignUser(fullDate, flight, item.id); // Use the passed fullDate
         },
         collect: (monitor) => ({
             isOver: monitor.isOver(),
@@ -37,7 +31,8 @@ export function DroppableCell({
     return (
         <TableCell
             ref={drop as unknown as React.RefObject<HTMLTableCellElement>}
-            className={`border text-center p-2 ${isOver ? 'bg-gray-100 dark:bg-background' : 'bg-white dark:bg-background'}`}
+            className={`border text-center p-2 ${isOver ? "bg-gray-100 dark:bg-background" : "bg-white dark:bg-background"
+                }`}
         >
             <div className="flex justify-center items-center flex-wrap gap-2 h-full">
                 {assignedUsers.map((userId, index) => {
@@ -47,14 +42,11 @@ export function DroppableCell({
                     return (
                         <DroppableBadge
                             key={userId + index}
-                            date={fullDate}
+                            date={fullDate} // Pass the correct fullDate here
                             flight={flight}
                             currentUserId={userId}
                             assignUser={assignUser}
-                            removeUser={(date, flight, userId) => {
-                                console.log('DroppableCell: Removing user:', { date, flight, userId });
-                                removeUser(date, flight, userId);
-                            }}
+                            removeUser={removeUser}
                             user={user}
                         />
                     );
