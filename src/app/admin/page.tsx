@@ -20,6 +20,7 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import useSWR from 'swr'
 import ErrorComp from '../error'
+import NotFound from '../not-found'
 import { useUser } from '../user-provider'
 import { DraggableUser } from './DraggableUser'
 import { DroppableCell } from './DroppableCell'
@@ -81,6 +82,9 @@ function groupUsersByJobType(users: User[]): { [jobType: string]: User[] } {
 
 export default function AdminPage() {
   const user = useUser()
+  if (!user) {
+    return <NotFound />;
+  }
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const { data: users, error } = useSWR<User[]>('/api/users', fetcher)
 

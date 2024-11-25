@@ -15,6 +15,7 @@ import UserFlights from './userFlights'
 export default function Page() {
   const user = useUser()
 
+
   const t = useTranslations('Index')
 
   const isHebrew = t('lang') === 'en'

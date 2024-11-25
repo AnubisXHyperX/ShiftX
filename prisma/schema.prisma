@@ -16,6 +16,7 @@ model User {
   passwordHash      String
   role              Role               @default(EMPLOYEE)
   jobType           JobType            @default(RAMPAGENT)
+  blocks            Block[]
   // division     Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
   // divisionId   String
   FlightAssignments FlightAssignment[]
@@ -58,4 +59,17 @@ model FlightAssignment {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, flight, date], name: "user_flight_day_unique")
+}
+
+model Block {
+  id     String   @id @default(cuid()) // Unique block ID
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  date   DateTime // Date of the block
+  hours  Json // Store all hours as a JSON object (e.g., { "0": true, "1": false, ... })
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date], name: "user_date_unique") // Ensure unique blocks for each user and date
 }

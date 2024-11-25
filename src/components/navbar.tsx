@@ -4,6 +4,7 @@ import { useUser } from '@/app/user-provider'
 import {
   LogInIcon,
   LogOutIcon,
+  OctagonXIcon,
   ShieldCheckIcon,
   UserIcon,
   UsersRoundIcon
@@ -95,6 +96,15 @@ const Navbar = () => {
                     >
                       <UsersRoundIcon className={DROPDOWN_ITEM_CLASS} />
                       {t('employees')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push('/blocks')
+                      }}
+                    >
+                      <OctagonXIcon className={DROPDOWN_ITEM_CLASS} />
+                      {t('blocks')}
                     </DropdownMenuItem>
                     {/* <DropdownMenuItem
                       onClick={() => {
