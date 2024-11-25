@@ -11,7 +11,6 @@ export async function POST(request: Request) {
         }
 
         const data: { [date: string]: { [hour: string]: boolean } } = await request.json(); // Parse JSON body
-        console.log('Received blocks data:', data);
 
         const blocksToSave = Object.entries(data).map(([date, hours]) => ({
             userId: user.id,

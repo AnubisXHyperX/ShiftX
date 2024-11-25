@@ -6,6 +6,7 @@ export const jobTypeColors: { [key in User['jobType']]: string } = {
     RAMPAGENT: 'bg-green-700 hover:bg-green-600',
     PLANNER: 'bg-blue-700 hover:bg-blue-600',
     LOADMASTER: 'bg-red-700 hover:bg-red-600',
+    TRAINEE: 'bg-purple-700 hover:bg-purple-600',
 }
 
 export function DraggableUser({ user }: { user: User }) {
@@ -20,7 +21,7 @@ export function DraggableUser({ user }: { user: User }) {
         }),
     }));
 
-    const color = jobTypeColors[user.jobType]; // Background color based on job type
+    const color = jobTypeColors[user.jobType];
 
     return (
         <div

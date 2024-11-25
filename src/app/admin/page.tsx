@@ -3,17 +3,12 @@
 import PageLoader from '@/components/page-loader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { fetcher } from '@/lib/fetcher'
 import { JobType } from '@prisma/client'
 import { addDays, format, startOfWeek } from 'date-fns'
-import { ArrowUpFromLineIcon, ChevronLeftIcon, ChevronRightIcon, NotebookPenIcon, PlaneIcon } from 'lucide-react'
+import { ArrowUpFromLineIcon, ChevronLeftIcon, ChevronRightIcon, NotebookPenIcon, PlaneIcon, UserRoundPlusIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { DndProvider } from 'react-dnd'
@@ -40,30 +35,21 @@ export interface User {
 }
 
 const flights = [
-  'Flight 1',
-  'Flight 2',
-  'Flight 3',
-  'Flight 4',
-  'Flight 5',
-  'Flight 6',
-  'Flight 7',
-  'Flight 8',
-  'Flight 9',
-  'Flight 10',
-  'Flight 11',
-  'Flight 12',
-  'Flight 13',
-  'Flight 14',
-  'Flight 15',
+  'X7-752',
+  'X7-753',
+  'X7-754',
+  'X7-755',
+  '5C-123',
+  '5C-124',
+  '5C-125',
+  '5C-126',
+  '5C-127',
+  '5C-128',
+  'X6-252',
+  'X6-253',
+  'X6-254',
+  'X6-255',
 ]
-
-
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('Failed to fetch')
-  return res.json()
-}
 
 // Helper function to group users by job type
 function groupUsersByJobType(users: User[]): { [jobType: string]: User[] } {
@@ -77,20 +63,15 @@ function groupUsersByJobType(users: User[]): { [jobType: string]: User[] } {
   return groups
 }
 
-// Map job types to colors
-
-
 export default function AdminPage() {
-  const user = useUser()
-  if (!user) {
-    return <NotFound />;
-  }
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const { data: users, error } = useSWR<User[]>('/api/users', fetcher)
 
+  const today = format(new Date(), 'yyyy-MM-dd'); // Get today's date formatted as 'yyyy-MM-dd'
   const [schedule, setSchedule] = useState<Schedule>({})
 
   const t = useTranslations('AdminPage')
+  const isRtl = t('lang') === 'he'; // Check if the language is RTL
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 0 }); // Week starts on Sunday
   const days = Array.from({ length: 7 }).map((_, index) => {
@@ -125,6 +106,11 @@ export default function AdminPage() {
 
     fetchAssignments()
   }, [])
+
+  const user = useUser()
+  if (!user) {
+    return <NotFound />;
+  }
 
   const assignUserToFlight = async (date: string, flight: string, userId: string) => {
     if (!date || !flight || !userId) {
@@ -213,30 +199,14 @@ export default function AdminPage() {
   };
 
   const getCompanyColor = (flight: string) => {
-    switch (flight) {
-      case 'Flight 1':
-      case 'Flight 2':
-      case 'Flight 3':
-      case 'Flight 4':
-        return 'dark:bg-amber-800 bg-amber-500'
-      case 'Flight 5':
-      case 'Flight 6':
-      case 'Flight 7':
-      case 'Flight 8':
-        return 'dark:bg-purple-800 bg-purple-500'
-      case 'Flight 9':
-      case 'Flight 10':
-      case 'Flight 11':
-      case 'Flight 12':
-        return 'dark:bg-cyan-800 bg-cyan-500'
-      case 'Flight 13':
-      case 'Flight 14':
-      case 'Flight 15':
-        return 'dark:bg-fuchsia-800 bg-fuchsia-500'
-      default:
-        return 'dark:bg-gray-800 bg-gray-500'
+    if (flight.startsWith('X7')) {
+      return 'dark:bg-amber-800 bg-amber-700';
+    } else if (flight.startsWith('X6')) {
+      return 'dark:bg-purple-800 bg-purple-700';
+    } else if (flight.startsWith('5C')) {
+      return 'dark:bg-cyan-800 bg-blue-700';
     }
-  }
+  };
 
 
   if (error) return <ErrorComp error={error} reset={function (): void {
@@ -248,15 +218,28 @@ export default function AdminPage() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <Card className="mx-auto max-w-6xl rounded-none xs:rounded-lg">
+      <Card className="mx-auto max-w-7xl rounded-none xs:rounded-lg">
         <CardHeader>
           <CardTitle className="text-xl">{t('title')}</CardTitle>
-          <CardDescription className='flex justify-between flex-col gap-4'>
+          <CardDescription className="flex justify-between flex-col gap-4">
             {t('content')}
-            <div className='flex justify-center gap-2' dir='rtl'>
-              <Badge className='text-background bg-green-700 hover:bg-green-600'><PlaneIcon size={12} />&nbsp;Ramp Agent</Badge>
-              <Badge className='text-background bg-blue-700 hover:bg-blue-600'><NotebookPenIcon size={12} />&nbsp;Planner</Badge>
-              <Badge className='text-background bg-red-700 hover:bg-red-600'><ArrowUpFromLineIcon size={12} />&nbsp;Loadmaster</Badge>
+            <div className="flex justify-center gap-2" dir="rtl">
+              <Badge className="text-background bg-purple-700 hover:bg-purple-700">
+                <UserRoundPlusIcon size={12} />
+                &nbsp;Trainee
+              </Badge>
+              <Badge className="text-background bg-green-700 hover:bg-green-700">
+                <PlaneIcon size={12} />
+                &nbsp;Ramp Agent
+              </Badge>
+              <Badge className="text-background bg-blue-700 hover:bg-blue-700">
+                <NotebookPenIcon size={12} />
+                &nbsp;Planner
+              </Badge>
+              <Badge className="text-background bg-red-700 hover:bg-red-700">
+                <ArrowUpFromLineIcon size={12} />
+                &nbsp;Loadmaster
+              </Badge>
             </div>
           </CardDescription>
         </CardHeader>
@@ -264,7 +247,6 @@ export default function AdminPage() {
           <Card className="p-4 flex flex-wrap gap-2">
             {Object.entries(groupedUsers).map(([jobType, users]) => (
               <div key={jobType}>
-                {/* <h3 className="text-lg font-bold">{jobType}</h3> */}
                 <div className="flex flex-wrap gap-2">
                   {users.map((user) => (
                     <DraggableUser key={user.id} user={user} />
@@ -273,25 +255,36 @@ export default function AdminPage() {
               </div>
             ))}
           </Card>
-          <div className="flex items-center justify-between py-4" dir='ltr'>
-            <Button onClick={handlePrevWeek} className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700" size={'icon'}>
-              <ChevronLeftIcon />
+          <div className="flex items-center justify-between py-4" dir={isRtl ? 'rtl' : 'ltr'}>
+            <Button
+              onClick={handlePrevWeek}
+              className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700"
+              size={'icon'}
+            >
+              {isRtl ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </Button>
             <div className="text-xl font-bold">
               {t('Week of')} {format(weekStart, 'dd/MM/yyyy')}
             </div>
-            <Button onClick={handleNextWeek} className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700" size={'icon'}>
-              <ChevronRightIcon />
+            <Button
+              onClick={handleNextWeek}
+              className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700"
+              size={'icon'}
+            >
+              {isRtl ? <ChevronLeftIcon /> : <ChevronRightIcon />}
             </Button>
           </div>
-          <Table className="rounded-lg text-background">
+          <Table className="text-white">
             <TableHeader>
               <TableRow>
-                <TableHead className="border text-center bg-secondary">Flights</TableHead>
+                <TableHead className="border text-center bg-secondary text-foreground">
+                  Flights
+                </TableHead>
                 {days.map((day) => (
                   <TableHead
                     key={day.key}
-                    className={`border text-center bg-secondary ${t('lang') === 'he' ? 'text-right' : 'text-center'}`}
+                    className={`border text-center text-foreground bg-secondary ${day.fullDate === today ? 'bg-yellow-200 dark:bg-opacity-50 ' : ''
+                      } ${isRtl ? 'text-right' : 'text-center'}`}
                   >
                     <div className="text-center flex flex-col">
                       <span className="font-semibold">{day.display}</span>
@@ -304,16 +297,23 @@ export default function AdminPage() {
             <TableBody>
               {flights.map((flight) => (
                 <TableRow key={flight} className="border text-center">
-                  <TableCell className={`border font-medium ${getCompanyColor(flight)} whitespace-nowrap`}>{flight}</TableCell>
+                  <TableCell
+                    className={`border font-medium ${getCompanyColor(flight)} whitespace-nowrap`}
+                  >
+                    {flight}
+                  </TableCell>
                   {days.map((day) => (
                     <DroppableCell
-                      key={`${day.fullDate}-${flight}`} // Use fullDate in the key
-                      fullDate={day.fullDate} // Pass fullDate explicitly
+                      key={`${day.fullDate}-${flight}`}
+                      fullDate={day.fullDate}
                       flight={flight}
-                      assignedUsers={schedule[day.fullDate]?.[flight] || []} // Use fullDate
+                      assignedUsers={schedule[day.fullDate]?.[flight] || []}
                       assignUser={assignUserToFlight}
                       removeUser={removeUserFromFlight}
                       users={users}
+                      className={
+                        day.fullDate === today ? 'bg-yellow-200 dark:bg-opacity-50' : ''
+                      }
                     />
                   ))}
                 </TableRow>
@@ -323,5 +323,5 @@ export default function AdminPage() {
         </CardContent>
       </Card>
     </DndProvider>
-  )
+  );
 }

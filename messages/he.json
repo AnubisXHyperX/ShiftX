@@ -15,9 +15,6 @@
     "trash": "פח אשפה",
     "logout": "יציאה",
     "login": "כניסה",
-    "contactUs": "צור קשר",
-    "privacyPolicy": "פרטיות",
-    "termOfUse": "תקנון",
     "language": "שפה",
     "notFound": "דף לא נמצא, חזור הביתה!",
     "error": "התרחשה שגיאה!",
@@ -25,25 +22,6 @@
     "dark": "לילה",
     "system": "מערכת",
     "lang": "he"
-  },
-  "Products": {
-    "title": "מוצרים",
-    "caption": "כאן מוסיפים ועורכים מוצרים",
-    "newItem": "פריט חדש",
-    "editItem": "ערוך פריט",
-    "name": "שם",
-    "description": "תיאור",
-    "close": "סגור"
-  },
-  "Employees": {
-    "title": "לקוחות",
-    "caption": "כאן מוסיפים ועורכים לקוחות",
-    "name": "שם",
-    "email": "אימייל",
-    "phoneNumber": "טלפון",
-    "close": "סגור",
-    "newItem": "פריט חדש",
-    "editItem": "ערוך פריט"
   },
   "Login": {
     "title": "התחברות",
@@ -69,42 +47,6 @@
     "hasAccount": "כבר יש משתמש?",
     "signIn": "התחבר"
   },
-  "Settings": {
-    "title": "הגדרות"
-  },
-  "Pallets": {
-    "clientSelect": "בחר לקוח",
-    "productSelect": "בחר מוצר",
-    "newItem": "פריט חדש",
-    "editItem": "ערוך פריט",
-    "cartons": "קרטונים",
-    "weight": "משקל",
-    "close": "סגור",
-    "alertTitle": "האם אתה בטוח?",
-    "shipAlertDescription": "הפעולה תיצור תעודת משלוח חדשה עבור הלקוח",
-    "alertAccept": "כן",
-    "alertCancel": "לא",
-    "product": "מוצר",
-    "name": "שם",
-    "title": "הזמנה {name}",
-    "deletedOrder": "הזמנה מחוקה"
-  },
-  "ShippingSlips": {
-    "title": "תעודות משלוח",
-    "caption": "כאן ניתן לראות תעודות משלוח היסטוריות עבור לקוח"
-  },
-  "Stats": {
-    "title": "סטטיסטיקות",
-    "caption": "כאן ניתן לחפש מידע על תעודות משלוח לפי טווחי זמן",
-    "pickDate": "בחר תאריך",
-    "product": "מוצר",
-    "kg": "ק״ג",
-    "total": "סה״כ",
-    "select": "בחר לקוחות"
-  },
-  "Team": {
-    "title": "צוות"
-  },
   "AdminPage": {
     "lang": "he",
     "title": "דף מנהל",
@@ -117,5 +59,16 @@
     "Friday": "יום שישי",
     "Saturday": "שבת",
     "Week of": "שבוע של"
+  },
+  "BlocksPage": {
+    "lang": "he",
+    "morning": "בוקר",
+    "noon": "צהריים",
+    "night": "לילה",
+    "shifts": "משמרות",
+    "title": "חסימות",
+    "description": "כאן ניתן לחסום משמרות.",
+    "weekOf": "שבוע של",
+    "saveBlocks": "שמירה"
   }
 }

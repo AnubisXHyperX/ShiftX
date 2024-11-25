@@ -1,48 +1,88 @@
-import { validateRequest } from '@/lib/auth'
-import prisma from '@/lib/db'
+import { validateRequest } from '@/lib/auth';
+import prisma from '@/lib/db';
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
-    const { user } = await validateRequest()
+    const { user } = await validateRequest();
 
     if (!user || user.id !== params.slug) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
     try {
+        // Fetch all assignments for the user
         const assignments = await prisma.flightAssignment.findMany({
             where: { userId: params.slug },
             select: {
-                date: true,
-                flight: true,
+                flight: true, // Flight number
+                date: true,   // Date of the flight
             },
-        })
+        });
 
-        // Convert raw data into the desired array format
-        const structuredAssignments = assignments.reduce((acc: { day: string; flights: { number: string; time: string; }[]; }[], assignment) => {
-            const date = new Date(assignment.date).toISOString().split('T')[0]
-            const existingDay = acc.find((a) => a.day === date)
+        // Fetch all assignments for flights on the same dates (to include other users)
+        const allAssignments = await prisma.flightAssignment.findMany({
+            where: {
+                date: {
+                    in: assignments.map((a) => a.date),
+                },
+            },
+            select: {
+                flight: true,
+                date: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        hebrewName: true,
+                        jobType: true,
+                    },
+                },
+            },
+        });
 
-            if (existingDay) {
-                existingDay.flights.push({
-                    number: assignment.flight,
+        // Group assignments by day and flight
+        const structuredAssignments = assignments.reduce(
+            (acc: { day: string; flights: { number: string; time: string; users: { id: string; name: string; role: string }[] }[] }[], assignment) => {
+                const day = new Date(assignment.date).toISOString().split('T')[0];
+                const flightNumber = assignment.flight;
+
+                // Find all users assigned to the same flight on the same date
+                const flightUsers = allAssignments
+                    .filter((fa) => fa.flight === flightNumber && fa.date.getTime() === assignment.date.getTime())
+                    .map((fa) => ({
+                        id: fa.user.id,
+                        name: fa.user.name,
+                        hebrewName: fa.user.hebrewName,
+                        role: fa.user.jobType,
+                    }));
+
+                // Find the existing day entry
+                const existingDay = acc.find((a) => a.day === day);
+
+                const flightData = {
+                    number: flightNumber,
                     time: new Date(assignment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                })
-            } else {
-                acc.push({
-                    day: date,
-                    flights: [
-                        {
-                            number: assignment.flight,
-                            time: new Date(assignment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        },
-                    ],
-                })
-            }
-            return acc
-        }, [])
+                    users: flightUsers,
+                };
 
-        return new Response(JSON.stringify(structuredAssignments), { status: 200 })
+                if (existingDay) {
+                    // Append flight to the existing day
+                    existingDay.flights.push(flightData);
+                } else {
+                    // Add a new day entry
+                    acc.push({
+                        day,
+                        flights: [flightData],
+                    });
+                }
+
+                return acc;
+            },
+            []
+        );
+
+        return new Response(JSON.stringify(structuredAssignments), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 })
+        console.error('GET Error:', error);
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 });
     }
 }

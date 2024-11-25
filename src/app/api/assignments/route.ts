@@ -43,37 +43,31 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const { user } = await validateRequest()
+        const { userId, flight, date } = await request.json();
+        const formattedDate = new Date(date);
 
-        if (!user) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+        // Check if the record already exists
+        const existingAssignment = await prisma.flightAssignment.findFirst({
+            where: { userId, flight, date: formattedDate },
+        });
+
+        if (existingAssignment) {
+            return new Response(
+                JSON.stringify({
+                    error: `Assignment already exists for userId: ${userId}, flight: ${flight}, date: ${date}`,
+                }),
+                { status: 409 } // Conflict
+            );
         }
 
-        const body = await request.json()
-        const { userId, date, flight } = body
+        // Create a new assignment
+        const assignment = await prisma.flightAssignment.create({
+            data: { userId, flight, date: formattedDate },
+        });
 
-        if (!userId || !date || !flight) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 })
-        }
-
-        const assignment = await prisma.flightAssignment.upsert({
-            where: {
-                user_flight_day_unique: { userId, flight, date: new Date(date) },
-            },
-            create: {
-                userId,
-                flight,
-                date: new Date(date),
-            },
-            update: {
-                flight,
-                date: new Date(date),
-            },
-        })
-
-        return new Response(JSON.stringify(assignment), { status: 200 })
+        return new Response(JSON.stringify(assignment), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 })
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 });
     }
 }
 
@@ -82,69 +76,70 @@ export async function DELETE(request: Request) {
         const { user } = await validateRequest();
 
         if (!user) {
-            console.error('Unauthorized request');
             return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
         }
 
         const url = new URL(request.url);
         const userId = url.searchParams.get('userId');
-        const date = url.searchParams.get('date');
         const flight = url.searchParams.get('flight');
+        const date = url.searchParams.get('date');
 
-        if (!userId || !date || !flight) {
-            console.error('Missing or invalid query parameters:', { userId, date, flight });
-            return new Response(JSON.stringify({ error: 'Missing required query parameters' }), { status: 400 });
+        if (!userId || !flight || !date) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
         }
 
-        console.log('Deleting assignment:', { userId, date, flight });
+        const formattedDate = new Date(date);
 
-        const result = await prisma.flightAssignment.delete({
+        // Delete the assignment safely
+        const deleteResult = await prisma.flightAssignment.deleteMany({
             where: {
-                user_flight_day_unique: { userId, flight, date: new Date(date) },
+                userId,
+                flight,
+                date: formattedDate,
             },
         });
 
-        console.log('Assignment deleted successfully:', result);
+        if (deleteResult.count === 0) {
+            return new Response(
+                JSON.stringify({ error: 'No matching assignment found to delete.' }),
+                { status: 404 }
+            );
+        }
+
         return new Response(null, { status: 204 });
     } catch (error) {
-        console.error('Error in DELETE handler:', error);
-        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 });
+        console.error('DELETE Error:', error);
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 });
     }
 }
 
 export async function PUT(request: Request) {
     try {
-        const { user } = await validateRequest()
+        const { currentUserId, newUserId, flight, date } = await request.json();
+        const formattedDate = new Date(date);
 
-        if (!user) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
-        }
+        // Perform atomic transaction
+        const result = await prisma.$transaction([
+            // Delete the existing assignment
+            prisma.flightAssignment.deleteMany({
+                where: { userId: currentUserId, flight, date: formattedDate },
+            }),
+            // Upsert the new assignment
+            prisma.flightAssignment.upsert({
+                where: {
+                    user_flight_day_unique: {
+                        userId: newUserId,
+                        flight,
+                        date: formattedDate,
+                    },
+                },
+                create: { userId: newUserId, flight, date: formattedDate },
+                update: {},
+            }),
+        ]);
 
-        const body = await request.json()
-        const { currentUserId, newUserId, date, flight } = body
-
-        if (!currentUserId || !newUserId || !date || !flight) {
-            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 })
-        }
-
-        // Remove current user
-        await prisma.flightAssignment.delete({
-            where: {
-                user_flight_day_unique: { userId: currentUserId, flight, date: new Date(date) },
-            },
-        })
-
-        // Add new user
-        const newAssignment = await prisma.flightAssignment.create({
-            data: {
-                userId: newUserId,
-                flight,
-                date: new Date(date),
-            },
-        })
-
-        return new Response(JSON.stringify(newAssignment), { status: 200 })
+        return new Response(JSON.stringify(result), { status: 200 });
     } catch (error) {
-        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 400 })
+        return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 });
     }
 }

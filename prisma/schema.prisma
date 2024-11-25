@@ -15,10 +15,8 @@ model User {
   hebrewName        String
   passwordHash      String
   role              Role               @default(EMPLOYEE)
-  jobType           JobType            @default(RAMPAGENT)
+  jobType           JobType            @default(TRAINEE)
   blocks            Block[]
-  // division     Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
-  // divisionId   String
   FlightAssignments FlightAssignment[]
 
   createdAt DateTime @default(now())
@@ -32,18 +30,13 @@ model Session {
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
-// model Division {
-//   id    String @id @default(cuid())
-//   name  String @unique
-//   users User[]
-// }
-
 enum Role {
   EMPLOYEE
   MANAGER
 }
 
 enum JobType {
+  TRAINEE
   RAMPAGENT
   PLANNER
   LOADMASTER
@@ -62,14 +55,14 @@ model FlightAssignment {
 }
 
 model Block {
-  id     String   @id @default(cuid()) // Unique block ID
+  id     String   @id @default(cuid())
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
-  date   DateTime // Date of the block
-  hours  Json // Store all hours as a JSON object (e.g., { "0": true, "1": false, ... })
+  date   DateTime
+  hours  Json
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, date], name: "user_date_unique") // Ensure unique blocks for each user and date
+  @@unique([userId, date], name: "user_date_unique")
 }

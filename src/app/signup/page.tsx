@@ -34,7 +34,7 @@ export default function Page() {
   const t = useTranslations('SignUp')
 
   const formSchema = z.object({
-    name: z.string().min(5, ''),
+    englishName: z.string().min(5, ''),
     hebrewName: z.string().min(5, ''),
     email: z.string().email(''),
     password: z.string().min(4, ''),
@@ -75,7 +75,7 @@ export default function Page() {
             <div className="space-y-2">
               <FormField
                 control={form.control}
-                name="name"
+                name="englishName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('name')}</FormLabel>

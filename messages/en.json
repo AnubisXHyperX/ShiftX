@@ -117,5 +117,16 @@
     "Friday": "Friday",
     "Saturday": "Saturday",
     "Week of": "Week of"
+  },
+  "BlocksPage": {
+    "lang": "en", 
+    "morning": "Morning",
+    "noon": "Noon",
+    "night": "Night",
+    "shifts": "Shifts",
+    "title": "Blocks",
+    "description": "Here you can edit and add blocks",
+    "weekOf": "Week of",
+    "saveBlocks": "Save"
   }
 }

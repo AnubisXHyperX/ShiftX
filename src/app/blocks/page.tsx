@@ -14,16 +14,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { fetcher } from '@/lib/fetcher';
 import { addDays, format, startOfWeek } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import useSWR from 'swr';
 import NotFound from '../not-found';
 import { useUser } from '../user-provider';
 
+const SHIFTS = ['morning', 'noon', 'night'] as const;
+
 export default function BlocksPage() {
-    const user = useUser();
-    if (!user) {
-        return <NotFound />;
-    }
+    const t = useTranslations('BlocksPage');
+    const isRtl = t('lang') === 'he'; // Determine if language is RTL
     const [currentWeek, setCurrentWeek] = useState(new Date());
     const [blocks, setBlocks] = useState<{ [date: string]: { [hour: string]: boolean } }>({});
     const [isSaving, setIsSaving] = useState(false);
@@ -38,39 +39,36 @@ export default function BlocksPage() {
         };
     });
 
-    const hours = Array.from({ length: 24 }, (_, i) => `${i}`); // 24-hour blocks as strings for consistency
-
-    // Fetch saved blocks using SWR
     const { data: savedBlocks, isLoading, mutate } = useSWR(
         `/api/blocks?weekStart=${weekStart.toISOString().split('T')[0]}`,
         fetcher,
         {
             onSuccess: (data) => {
-                console.log('Fetched Blocks:', data); // Debug fetched blocks
+                console.log('Fetched Blocks:', data);
             },
         }
     );
+
+    const shiftLabels = SHIFTS.map((shift) => t(shift)); // Translated shift labels
 
     const toggleBlock = (date: string, hour?: string) => {
         setBlocks((prev) => {
             const updatedBlocks = { ...prev };
 
             if (hour) {
-                // Toggle a specific hour
                 updatedBlocks[date] = {
-                    ...savedBlocks?.[date], // Preserve previously saved state
-                    ...updatedBlocks[date], // Preserve already toggled state
+                    ...savedBlocks?.[date],
+                    ...updatedBlocks[date],
                     [hour]: !(updatedBlocks[date]?.[hour] ?? savedBlocks?.[date]?.[hour] ?? false),
                 };
             } else {
-                // Toggle the whole day
-                const isDayBlocked = hours.every(
+                const isDayBlocked = SHIFTS.every(
                     (h) => updatedBlocks[date]?.[h] ?? savedBlocks?.[date]?.[h] ?? false
                 );
 
                 updatedBlocks[date] = {};
-                hours.forEach((h) => {
-                    updatedBlocks[date][h] = !isDayBlocked; // Block or unblock the entire day
+                SHIFTS.forEach((h) => {
+                    updatedBlocks[date][h] = !isDayBlocked;
                 });
             }
 
@@ -82,7 +80,6 @@ export default function BlocksPage() {
         try {
             setIsSaving(true);
 
-            // Merge savedBlocks and blocks to ensure the state is consistent
             const mergedBlocks = { ...savedBlocks };
             Object.entries(blocks).forEach(([date, hours]) => {
                 if (!mergedBlocks[date]) {
@@ -96,14 +93,14 @@ export default function BlocksPage() {
             const response = await fetch('/api/blocks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mergedBlocks), // Send the merged state
+                body: JSON.stringify(mergedBlocks),
             });
 
             if (!response.ok) {
                 const error = await response.json();
                 console.error('Failed to save blocks:', error);
             } else {
-                mutate(); // Revalidate SWR after saving
+                mutate();
             }
         } catch (error) {
             console.error('Error saving blocks:', error);
@@ -111,48 +108,59 @@ export default function BlocksPage() {
         setIsSaving(false);
     };
 
+    const user = useUser();
+    if (!user) {
+        return <NotFound />;
+    }
+
+    const handlePrevWeek = () => {
+        setCurrentWeek((prev) => addDays(prev, isRtl ? 7 : -7));
+    };
+
+    const handleNextWeek = () => {
+        setCurrentWeek((prev) => addDays(prev, isRtl ? -7 : 7));
+    };
+
     return (
         <Card className="mx-auto max-w-6xl rounded-none xs:rounded-lg">
             <CardHeader>
-                <CardTitle className="text-xl">Schedule Your Blocks</CardTitle>
+                <CardTitle className="text-xl">{t('title')}</CardTitle>
                 <CardDescription className="flex justify-between items-center gap-4">
-                    Use the table below to select or release your preferred blocks for the week.
+                    {t('description')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
-                {/* Week Navigation */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center" dir={isRtl ? 'rtl' : 'ltr'}>
                     <Button
                         className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700"
                         size="icon"
-                        onClick={() => setCurrentWeek((prev) => addDays(prev, -7))}
+                        onClick={handlePrevWeek}
                     >
-                        <ChevronLeftIcon />
+                        {isRtl ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                     </Button>
                     <h2 className="text-xl font-bold">
-                        Week of {format(weekStart, 'dd/MM/yyyy')}
+                        {t('weekOf')} {format(weekStart, 'dd/MM/yyyy')}
                     </h2>
                     <Button
                         className="bg-secondary hover:bg-gray-200 text-xl font-bold text-gray-700"
                         size="icon"
-                        onClick={() => setCurrentWeek((prev) => addDays(prev, 7))}
+                        onClick={handleNextWeek}
                     >
-                        <ChevronRightIcon />
+                        {isRtl ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                     </Button>
                 </div>
 
-                {/* Table */}
-                {!isLoading ?
+                {!isLoading ? (
                     <div>
-                        <Table className="border rounded-lg text-background">
+                        <Table className="border text-background">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="border text-center bg-secondary">Times</TableHead>
+                                    <TableHead className="border text-center bg-secondary">{t('shifts')}</TableHead>
                                     {days.map((day) => (
                                         <TableHead
                                             key={day.key}
                                             className="border text-center bg-secondary cursor-pointer"
-                                            onClick={() => toggleBlock(day.fullDate)} // Toggle the whole day
+                                            onClick={() => toggleBlock(day.fullDate)}
                                         >
                                             <div className="text-center flex flex-col">
                                                 <span className="font-semibold">{day.display}</span>
@@ -163,10 +171,10 @@ export default function BlocksPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="border">
-                                {hours.map((hour) => (
+                                {SHIFTS.map((hour, index) => (
                                     <TableRow key={hour} className="border text-center">
-                                        <TableCell className="border text-gray-500 bg-secondary font-medium">
-                                            {hour}:00
+                                        <TableCell className="border text-gray-500 bg-secondary font-medium h-12">
+                                            {shiftLabels[index]}
                                         </TableCell>
                                         {days.map((day) => {
                                             const isBlocked =
@@ -188,7 +196,6 @@ export default function BlocksPage() {
                             </TableBody>
                         </Table>
 
-
                         <div className="mt-4 text-center">
                             <Button
                                 onClick={handleSave}
@@ -197,13 +204,13 @@ export default function BlocksPage() {
                                 className={`bg-primary hover:bg-primary/90 ${isSaving ? 'cursor-not-allowed' : ''
                                     }`}
                             >
-                                {isSaving ? <ButtonLoader isLoading /> : 'Save Blocks'}
+                                {isSaving ? <ButtonLoader isLoading /> : t('saveBlocks')}
                             </Button>
                         </div>
                     </div>
-                    : <PageLoader />
-                }
-
+                ) : (
+                    <PageLoader />
+                )}
             </CardContent>
         </Card>
     );

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     console.log(process.env.SIGNUP_ALLOWED)
     return Response.json('signup is not permitted in testing', { status: 405 })
   }
-  const { email, password, name, hebrewName } = await request.json()
+  const { email, password, englishName, hebrewName } = await request.json()
   //   // username must be between 4 ~ 31 characters, and only consists of lowercase letters, 0-9, -, and _
   //   // keep in mind some database (e.g. mysql) are case insensitive
   //   if (
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   const user = await prisma.user.create({
     data: {
       id: userId,
-      name,
+      name: englishName,
       email,
       passwordHash,
       hebrewName,

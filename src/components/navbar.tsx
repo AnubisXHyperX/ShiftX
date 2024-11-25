@@ -6,8 +6,7 @@ import {
   LogOutIcon,
   OctagonXIcon,
   ShieldCheckIcon,
-  UserIcon,
-  UsersRoundIcon
+  UserIcon
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -73,31 +72,7 @@ const Navbar = () => {
               <>
                 {user.role === 'MANAGER' && (
                   <>
-                    {/* <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/profile')
-                      }}
-                    >
-                      <UserIcon className={DROPDOWN_ITEM_CLASS} />
-                      {t('profile')}
-                    </DropdownMenuItem> */}
-                    {/* <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/products')
-                      }}
-                    >
-                      <BananaIcon className={DROPDOWN_ITEM_CLASS} />
-                      {t('products')}
-                    </DropdownMenuItem> */}
-                    <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/workers')
-                      }}
-                    >
-                      <UsersRoundIcon className={DROPDOWN_ITEM_CLASS} />
-                      {t('employees')}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    {/* <DropdownMenuSeparator /> */}
                     <DropdownMenuItem
                       onClick={() => {
                         router.push('/blocks')
@@ -106,31 +81,6 @@ const Navbar = () => {
                       <OctagonXIcon className={DROPDOWN_ITEM_CLASS} />
                       {t('blocks')}
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/team')
-                      }}
-                    >
-                      <UsersIcon className={DROPDOWN_ITEM_CLASS} />
-                      {t('team')}
-                    </DropdownMenuItem> */}
-                    {/* <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/settings')
-                      }}
-                    >
-                      <SettingsIcon className={DROPDOWN_ITEM_CLASS} />
-                      {t('settings')}
-                    </DropdownMenuItem> */}
-                    {/* <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => {
-                        router.push('/orders?status=deleted')
-                      }}
-                    >
-                      <Trash2Icon className={DROPDOWN_ITEM_CLASS} />
-                      {t('trash')}
-                    </DropdownMenuItem> */}
                     <DropdownMenuSeparator />
                   </>
                 )}
