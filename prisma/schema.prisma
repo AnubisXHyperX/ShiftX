@@ -16,6 +16,7 @@ model User {
   passwordHash      String
   role              Role               @default(EMPLOYEE)
   jobType           JobType            @default(TRAINEE)
+  qualifications    Qualification?
   blocks            Block[]
   FlightAssignments FlightAssignment[]
 
@@ -40,6 +41,11 @@ enum JobType {
   RAMPAGENT
   PLANNER
   LOADMASTER
+}
+
+enum Qualification {
+  B767
+  B747
 }
 
 model FlightAssignment {

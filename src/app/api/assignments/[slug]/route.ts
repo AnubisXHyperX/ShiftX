@@ -33,6 +33,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
                         id: true,
                         name: true,
                         hebrewName: true,
+                        qualifications: true,
                         jobType: true,
                     },
                 },
@@ -53,6 +54,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
                         name: fa.user.name,
                         hebrewName: fa.user.hebrewName,
                         role: fa.user.jobType,
+                        qualification: fa.user.qualifications,
                     }));
 
                 // Find the existing day entry

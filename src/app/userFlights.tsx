@@ -3,6 +3,7 @@
 import PageLoader from '@/components/page-loader';
 import { Badge } from '@/components/ui/badge';
 import { fetcher } from '@/lib/fetcher';
+import { Qualification } from '@prisma/client';
 import { ChevronLeftIcon, ChevronRightIcon, SlashIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -15,7 +16,7 @@ import { useUser } from './user-provider';
 interface Flight {
     number: string;
     time: string;
-    users: { id: string; name: string; hebrewName: string; role: keyof typeof Roles }[];
+    users: { id: string; name: string; hebrewName: string; qualification: keyof typeof Qualification; role: keyof typeof Roles }[];
 }
 
 interface UserAssignments {
@@ -132,15 +133,26 @@ export default function UserFlights() {
                             {/* Users Assigned to the Flight */}
                             <div className="flex flex-wrap justify-center gap-2">
                                 {flight.users.map((user) => (
+                                    console.log(user.name, user.qualification),
                                     <Badge
                                         key={user.id}
                                         dir={isRtl ? 'rtl' : 'ltr'}
-                                        className={`flex flex-col text-center px-3 py-1 ${user.role === 'RAMPAGENT'
-                                            ? 'bg-green-700 hover:bg-green-600'
-                                            : user.role === 'PLANNER'
-                                                ? 'bg-blue-700 hover:bg-blue-600'
-                                                : user.role === 'LOADMASTER' ? 'bg-red-700 hover:bg-red-600' : 'bg-purple-700 hover:bg-purple-600'
-                                            }`}
+                                        className={`flex flex-col text-center px-3 py-1 
+                                            ${user.role === 'RAMPAGENT'
+                                                ? 'bg-green-700 hover:bg-green-600'
+                                                : user.role === 'PLANNER'
+                                                    ? 'bg-blue-700 hover:bg-blue-600'
+                                                    : user.role === 'LOADMASTER'
+                                                        ? 'bg-red-700 hover:bg-red-600'
+                                                        : 'bg-purple-700 hover:bg-purple-600'
+                                            }
+                                            ${user.qualification === 'B747'
+                                                ? 'border-2 border-double border-amber-500 shadow-[rgba(245,158,11,0.7)_3px_3px_4px_0px]'
+                                                : user.qualification === 'B767'
+                                                    ? 'border-2 border-double border-cyan-500 shadow-[rgba(6,182,212,0.7)_3px_3px_4px_0px]'
+                                                    : 'border-2 border-double border-pink-500 shadow-[rgba(236,72,153,0.7)_3px_3px_4px_0px]'
+                                            }
+                                        `}
                                     >
                                         {isRtl ? user.hebrewName : user.name}<br /> <span className='italic font-extralight'>({Roles[user.role]})</span>
                                     </Badge>

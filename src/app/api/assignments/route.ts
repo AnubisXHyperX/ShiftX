@@ -1,5 +1,6 @@
 import { validateRequest } from '@/lib/auth'
 import prisma from '@/lib/db'
+import { random } from 'lodash'
 
 type Schedule = {
     [day: string]: {
@@ -45,6 +46,8 @@ export async function POST(request: Request) {
     try {
         const { userId, flight, date } = await request.json();
         const formattedDate = new Date(date);
+        formattedDate.setHours(formattedDate.getHours() + random(0, 23));
+        formattedDate.setMinutes(formattedDate.getMinutes() + random(0, 59));
 
         // Check if the record already exists
         const existingAssignment = await prisma.flightAssignment.findFirst({
